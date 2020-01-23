@@ -6,12 +6,6 @@ from app.models.Models import Customers, CustomersSchema, ProductsSchema, Produc
 from app.models import Models
 
 
-class HelloWorld(Resource):
-    def get(self):
-        return make_response(jsonify(
-            {'message':'Hello World'}
-        ), 200)
-
 class Customer(Resource):
     def get(self, id):
         user_schema = CustomersSchema()
@@ -30,17 +24,17 @@ class Customer(Resource):
 class Register(Resource):
     def post(self):
         json_data = request.get_json(force=True)
-        
+        print(json_data)
         user_schema = CustomersSchema()
         customer = Customers(
-            first_name = NULL,
-            last_name = NULL,
+            first_name = None,
+            last_name = None,
             email = json_data['email'],
-            address = NULL,
-            city = NULL,
-            state = NULL,
-            zip = NULL,
-            phone = NULL,
+            address = None,
+            city = None,
+            state = None,
+            zip = None,
+            phone = None,
             password = json_data['password']
         )
         customer.add()

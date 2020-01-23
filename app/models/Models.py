@@ -191,7 +191,7 @@ class OrderDetails(db.Model):
             order_id = order.id
         product = Products.query.filter_by(id=json_data['product_id']).with_for_update().one()
         if product.quantity < json_data['quantity']:
-            return jsonify({'msg':'Error, not enough items'})
+            return jsonify({'msg':'Error, not enough items in inventory'})
         else:  
             product.quantity -= json_data['quantity']
             db.session.commit()
