@@ -18,13 +18,14 @@ class Customer(Resource):
         json_data = request.get_json(force=True)
         customer = Models.Customers.update(id, json_data)
         result = customer_schema.dump(customer)
+        print(result)
         return result
     
 
 class Register(Resource):
     def post(self):
         json_data = request.get_json(force=True)
-        print(json_data)
+
         user_schema = CustomersSchema()
         customer = Customers(
             first_name = None,
@@ -41,7 +42,7 @@ class Register(Resource):
         return user_schema.dump(customer)
 
 class Login(Resource):
-    def get(self):
+    def post(self):
         json_data = request.get_json(force=True)
         customer_schema = CustomersSchema()
         customer = Models.Customers.get_by_email(json_data)
@@ -98,6 +99,7 @@ class Categories(Resource):
 class AddProdcutToOrder(Resource):
     def post(self):
         json_data = request.get_json(force=True)
+        print(json_data)
         model = Models.OrderDetails.add(json_data)
         return model
 
@@ -115,4 +117,12 @@ class Order(Resource):
         print(order)
         result = Models.OrderDetailsSchema(many=True).dump(order)
         # print(result[0].order_date)
+        return result
+
+class Orders(Resource):
+    def get(self, id):
+        order_schema = Models.OrdersSchema(many=True)
+        orders = Models.Orders.get(id)
+        result = order_schema.dump(orders)
+        print(result)
         return result

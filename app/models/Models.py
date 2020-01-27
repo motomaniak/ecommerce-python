@@ -120,8 +120,9 @@ class Customers(db.Model):
         customer.state = json_data['state']
         customer.zip = json_data['zip']
         customer.phone = json_data['phone']
-        customer.password = generate_password_hash(json_data['password'])
+        # customer.password = generate_password_hash(json_data['password'])
         db.session.commit()
+        return customer
 
     def get_by_email(json_data):
         customer = Customers.query.filter_by(email=json_data['email']).first()
@@ -139,10 +140,11 @@ class Orders(db.Model):
     customer = db.relationship('Customers', foreign_keys=customer_id)
     order_details = db.relationship('OrderDetails', cascade='all,delete', backref='orders')
 
-    def __init__(self, customer_id):
+    def __init__(self, customer_id, order_date):
         self.status = "Pending"
         self.customer_id = customer_id
         self.shippid_date = None 
+        self.order_date = order_date
 
     def add(self):
         db.session.add(self)
@@ -183,7 +185,7 @@ class OrderDetails(db.Model):
         order_id = None
         order = Orders.query.filter_by(customer_id=json_data['customer_id'], status='Pending').first()
         if not order:
-            new_order = Orders(json_data['customer_id'])
+            new_order = Orders(json_data['customer_id'], json_data['date'])
             db.session.add(new_order)
             db.session.commit()
             order_id = new_order.id
@@ -191,7 +193,7 @@ class OrderDetails(db.Model):
             order_id = order.id
         product = Products.query.filter_by(id=json_data['product_id']).with_for_update().one()
         if product.quantity < json_data['quantity']:
-            return jsonify({'msg':'Error, not enough items in inventory'})
+            return jsonify({'err':'Error, not enough items in inventory'})
         else:  
             product.quantity -= json_data['quantity']
             db.session.commit()
