@@ -1,24 +1,25 @@
 from flask import make_response, jsonify, request
 from flask_restful import Resource
 from werkzeug.security import check_password_hash
-
+from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from app.models.Models import Customers, CustomersSchema, ProductsSchema, Products, OrderDetails
 from app.models import Models
 
 
 class Customer(Resource):
+    @jwt_required
     def get(self, id):
         user_schema = CustomersSchema()
         user = Customers.get_by_id(id)
         result = user_schema.dump(user)
         return result
-
+    
+    @jwt_required
     def put(self, id):
         customer_schema = CustomersSchema()
         json_data = request.get_json(force=True)
         customer = Models.Customers.update(id, json_data)
         result = customer_schema.dump(customer)
-        print(result)
         return result
     
 
@@ -38,8 +39,13 @@ class Register(Resource):
             phone = None,
             password = json_data['password']
         )
-        customer.add()
-        return user_schema.dump(customer)
+        try:
+            customer.add()
+            access_token = create_access_token(identity = customer.id)
+            refresh_token = create_refresh_token(identity = customer.id)
+            return {'customer': user_schema.dump(customer), 'access_token': access_token, 'refresh_token': refresh_token }
+        except:
+            return {'msg': 'Something went wrong'}, 500
 
 class Login(Resource):
     def post(self):
@@ -50,7 +56,9 @@ class Login(Resource):
         valid_password = check_password_hash(customer_model['password'], json_data['password'])
         
         if(valid_password):
-            return customer_model
+            access_token = create_access_token(identity=customer.id)
+            refresh_token = create_refresh_token(identity=customer.id)
+            return {'customer': customer_model, 'access_token': access_token, 'refresh_token': refresh_token}
         else:
             return jsonify({'msg':'Password or email is incorrect'})
 

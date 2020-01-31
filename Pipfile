@@ -18,6 +18,7 @@ bcrypt = "*"
 marshmallow-sqlalchemy = "*"
 bson = "*"
 flask-cors = "*"
+flask-jwt-extended = "*"
 
 [requires]
 python_version = "3.7"
