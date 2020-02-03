@@ -1,4 +1,4 @@
-from flask import make_response, jsonify, request
+from flask import make_response, jsonify, request, abort
 from flask_restful import Resource
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
@@ -60,7 +60,7 @@ class Login(Resource):
             refresh_token = create_refresh_token(identity=customer.id)
             return {'customer': customer_model, 'access_token': access_token, 'refresh_token': refresh_token}
         else:
-            return jsonify({'msg':'Password or email is incorrect'})
+            return {'error':'Password or email is incorrect'}, 401
 
 class Product(Resource):
     def get(self, id):
