@@ -111,7 +111,7 @@ class Customers(db.Model):
         return self
 
     def update(id, json_data):
-        customer = Customers.query.filter_by(id=id).first()
+        customer = Customers.query.filter_by(id=id).first_or_404()
         customer.first_name = json_data['first_name']
         customer.last_name = json_data['last_name']
         customer.email = json_data['email']
@@ -125,7 +125,7 @@ class Customers(db.Model):
         return customer
 
     def get_by_email(json_data):
-        customer = Customers.query.filter_by(email=json_data['email']).first()
+        customer = Customers.query.filter_by(email=json_data['email']).first_or_404()
         return customer
 
 
@@ -157,7 +157,11 @@ class Orders(db.Model):
         db.session.commit()
 
     def get(id):
-        order = Orders.query.filter_by(customer_id=id).all()
+        order = Orders.query.filter_by(customer_id=id).filter(Orders.status != "Pending").all()
+        return order
+
+    def get_cart(id):
+        order = Orders.query.filter_by(customer_id=id).filter(Orders.status == "Pending").first()
         return order
         
 
@@ -206,8 +210,16 @@ class OrderDetails(db.Model):
         order_details = OrderDetails.query.filter_by(order_id=id)
         return order_details
 
-    def delete(self, id):
-        pass
+    def delete(product_id, order_id):
+        item = OrderDetails.query.filter_by(product_id=product_id).filter_by(order_id=order_id).first_or_404()
+        product = Products.query.filter_by(id=product_id).first_or_404()
+        product.quantity += item.quantity
+        try:
+            db.session.delete(item)
+            db.session.commit()
+            return {"message":"OK", "status":200}
+        except Exception as e:
+            return {"message":e, "status":500}
 
 class CustomersSchema(ma.ModelSchema):
     class Meta:
@@ -236,4 +248,9 @@ class OrdersSchema(ma.ModelSchema):
         fields = ['id', 'order_date', 'shipped_date', 'status', 'order_details']
     order_details = ma.Nested(OrderDetailsSchema, many=True)
 
+class CartSchema(ma.ModelSchema):
+    class Meta:
+        model = Orders
+        fields = ['id', 'order_date', 'shipped_date', 'status', 'order_details']
+    order_details = ma.Nested(OrderDetailsSchema, many=True)
 

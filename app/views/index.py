@@ -10,16 +10,19 @@ class Customer(Resource):
     @jwt_required
     def get(self, id):
         user_schema = CustomersSchema()
-        user = Customers.get_by_id(id)
+        customer_id = get_jwt_identity()
+        user = Customers.get_by_id(customer_id)
         result = user_schema.dump(user)
-        return result
+        return {'customer': result}
     
     @jwt_required
     def put(self, id):
         customer_schema = CustomersSchema()
+        customer_id = get_jwt_identity()
         json_data = request.get_json(force=True)
-        customer = Models.Customers.update(id, json_data)
+        customer = Models.Customers.update(customer_id, json_data)
         result = customer_schema.dump(customer)
+        print(result)
         return result
     
 
@@ -107,24 +110,21 @@ class Categories(Resource):
 class AddProdcutToOrder(Resource):
     def post(self):
         json_data = request.get_json(force=True)
-        print(json_data)
         model = Models.OrderDetails.add(json_data)
         return model
 
-class OrderDetails(Resource):
-    def get(self, id):
-        order_details = Models.OrderDetails.get(id)
-        for order in order_details:
-            print(order[0])
-        return jsonify({"result":"I hate my life"})
+# class OrderDetails(Resource):
+#     def get(self, id):
+#         order_details = Models.OrderDetails.get(id)
+#         for order in order_details:
+#             print(order[0])
+#         return jsonify({"result":"I hate my life"})
         
 class Order(Resource):
     def get(self, id):
         order_schema = Models.OrdersSchema(many=True)
         order = Models.OrderDetails.get(id)
-        print(order)
         result = Models.OrderDetailsSchema(many=True).dump(order)
-        # print(result[0].order_date)
         return result
 
 class Orders(Resource):
@@ -132,5 +132,18 @@ class Orders(Resource):
         order_schema = Models.OrdersSchema(many=True)
         orders = Models.Orders.get(id)
         result = order_schema.dump(orders)
-        print(result)
+        return result
+
+class Cart(Resource):
+    @jwt_required
+    def get(self):
+        customer_id = get_jwt_identity()
+        cart_shema = Models.CartSchema()
+        cart = Models.Orders.get_cart(customer_id)
+        result = cart_shema.dump(cart)
+        return result
+
+    def delete(self):
+        json_data = request.get_json(force=True)
+        result = Models.OrderDetails.delete(json_data['product_id'], json_data['order_id'])
         return result

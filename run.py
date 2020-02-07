@@ -20,7 +20,7 @@ CORS(app)
 
 api = Api(app)
 
-from app.views.index import Orders, Categories, OrderDetails, Customer, Register, Product, Products, Login, AddProdcutToOrder, Order
+from app.views.index import Orders, Categories, OrderDetails, Customer, Register, Product, Products, Login, AddProdcutToOrder, Order, Cart
 
 api.add_resource(Customer, '/api/customer/<int:id>')
 api.add_resource(Register, '/api/auth/register')
@@ -31,6 +31,7 @@ api.add_resource(AddProdcutToOrder, '/api/order/add')
 api.add_resource(Order, '/api/order/<int:id>')
 api.add_resource(Orders, '/api/orders/<int:id>')
 api.add_resource(Categories, '/api/categories')
+api.add_resource(Cart, '/api/cart')
 
 if __name__ == '__main__':
     app.run(debug=True)
