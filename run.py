@@ -34,4 +34,4 @@ api.add_resource(Categories, '/api/categories')
 api.add_resource(Cart, '/api/cart')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
