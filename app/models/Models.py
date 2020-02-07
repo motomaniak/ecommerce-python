@@ -197,14 +197,17 @@ class OrderDetails(db.Model):
             order_id = order.id
         product = Products.query.filter_by(id=json_data['product_id']).with_for_update().one()
         if product.quantity < json_data['quantity']:
-            return jsonify({'err':'Error, not enough items in inventory'})
+            return {'error':'Error, not enough items in inventory'}, 500
         else:  
             product.quantity -= json_data['quantity']
             db.session.commit()
             order_details = OrderDetails(json_data['product_id'], order_id, json_data['quantity'], product.price, json_data['discount'])
-            db.session.add(order_details)
-            db.session.commit()
-            return jsonify({"msg":"OK", "status":200})
+            try:
+                db.session.add(order_details)
+                db.session.commit()
+                return {"message":"OK"}, 200
+            except Exception as e:
+                return {"error": e}, 500
 
     def get(id):
         order_details = OrderDetails.query.filter_by(order_id=id)
@@ -217,9 +220,9 @@ class OrderDetails(db.Model):
         try:
             db.session.delete(item)
             db.session.commit()
-            return {"message":"OK", "status":200}
+            return {"message":"OK"}, 200 
         except Exception as e:
-            return {"message":e, "status":500}
+            return {"error": e}, 500
 
 class CustomersSchema(ma.ModelSchema):
     class Meta:
