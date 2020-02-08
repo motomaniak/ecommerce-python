@@ -174,7 +174,7 @@ class OrderDetails(db.Model):
     order_id = db.Column(db.Integer,  db.ForeignKey(Orders.id), primary_key=True)
     quantity = db.Column(db.Integer)
     list_price = db.Column(db.Float)
-    discount = db.Column(db.Float, db.CheckConstraint('0<=discount<1'))
+    discount = db.Column(db.Float, db.CheckConstraint('0<=discount AND discount <1'))
     product = db.relationship('Products', backref='orderdetails')
     order = db.relationship('Orders', backref='orderdetails')
 
