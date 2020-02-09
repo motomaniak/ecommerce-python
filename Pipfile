@@ -19,6 +19,9 @@ marshmallow-sqlalchemy = "*"
 bson = "*"
 flask-cors = "*"
 flask-jwt-extended = "*"
+wheel = "*"
+uwsgi = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"
