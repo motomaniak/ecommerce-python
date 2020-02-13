@@ -163,6 +163,15 @@ class Orders(db.Model):
     def get_cart(id):
         order = Orders.query.filter_by(customer_id=id).filter(Orders.status == "Pending").first()
         return order
+
+    def checkout(id):
+        order = Orders.query.filter_by(id=id).first_or_404()
+        order.status = "Paid"
+        try:
+            db.session.commit()
+            return {"message":"OK"}, 200
+        except e: 
+            return {"error": e}, 500
         
 
     def __repr__(self):
@@ -223,6 +232,10 @@ class OrderDetails(db.Model):
             return {"message":"OK"}, 200 
         except Exception as e:
             return {"error": e}, 500
+    
+    def update():
+        # add functionality to update the number of items in cart
+        pass
 
 class CustomersSchema(ma.ModelSchema):
     class Meta:

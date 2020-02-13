@@ -22,7 +22,6 @@ class Customer(Resource):
         json_data = request.get_json(force=True)
         customer = Models.Customers.update(customer_id, json_data)
         result = customer_schema.dump(customer)
-        print(result)
         return result
     
 
@@ -147,3 +146,9 @@ class Cart(Resource):
         json_data = request.get_json(force=True)
         result = Models.OrderDetails.delete(json_data['product_id'], json_data['order_id'])
         return result
+
+class Checkout(Resource):
+    def put(self):
+        json_data = request.get_json(force=True)
+        result = Models.Orders.checkout(json_data['order_id'])
+        return result 
