@@ -22,6 +22,7 @@ flask-jwt-extended = "*"
 wheel = "*"
 uwsgi = "*"
 requests = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.7"
