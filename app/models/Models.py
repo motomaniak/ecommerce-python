@@ -13,7 +13,6 @@ class Products(db.Model):
     quantity = db.Column(db.Integer)
     price = db.Column(db.Float)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
-    # category = db.relationship('Categories', foreign_keys=category_id)
     order_details = db.relationship('OrderDetails', backref='prodcuts', lazy=True)
 
     def __init__(self, name, description, image, quantity, price, category_id):
@@ -34,8 +33,6 @@ class Products(db.Model):
     
     def get_all():
         return db.session.query(Products).all()
-        # return Products.query.join(Categories).all()
-        # return Products.query.options(joinedload('categories')).all()[0].categories
 
     def get_by_id(id):
         return Products.query.filter_by(id=id).join(Categories).one()
@@ -229,6 +226,17 @@ class OrderDetails(db.Model):
         try:
             db.session.delete(item)
             db.session.commit()
+            count = OrderDetails.query.filter_by(order_id=order_id).count()
+            if count == 0:
+                print(count)
+                order = Orders.query.filter_by(id=order_id).first()
+                print(order)
+                try:
+                    db.session.delete(order)
+                    db.session.commit()
+                    return {"message": "OK"}, 200
+                except Exception as e:
+                    return {"error": e}, 500
             return {"message":"OK"}, 200 
         except Exception as e:
             return {"error": e}, 500

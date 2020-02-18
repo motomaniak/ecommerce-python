@@ -111,13 +111,6 @@ class AddProdcutToOrder(Resource):
         json_data = request.get_json(force=True)
         model = Models.OrderDetails.add(json_data)
         return model
-
-# class OrderDetails(Resource):
-#     def get(self, id):
-#         order_details = Models.OrderDetails.get(id)
-#         for order in order_details:
-#             print(order[0])
-#         return jsonify({"result":"I hate my life"})
         
 class Order(Resource):
     def get(self, id):
