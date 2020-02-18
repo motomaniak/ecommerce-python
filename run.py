@@ -10,9 +10,7 @@ from config import config_settings
 
 app = Flask(__name__)
 app.config.from_object(config_settings['development'])
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-app.config['JWT_SECRET_KEY'] = 'rW27%NkfVQMUq%hnj%9RCp&9s$pkpfqVNwbbuwn'
 ma = Marshmallow(app)
 jwt = JWTManager(app)
 migrate = Migrate(app, db)
