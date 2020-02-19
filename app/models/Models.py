@@ -228,9 +228,7 @@ class OrderDetails(db.Model):
             db.session.commit()
             count = OrderDetails.query.filter_by(order_id=order_id).count()
             if count == 0:
-                print(count)
                 order = Orders.query.filter_by(id=order_id).first()
-                print(order)
                 try:
                     db.session.delete(order)
                     db.session.commit()
@@ -241,9 +239,23 @@ class OrderDetails(db.Model):
         except Exception as e:
             return {"error": e}, 500
     
-    def update():
-        # add functionality to update the number of items in cart
-        pass
+    def update(order_id, product_id, quantity):
+        item = OrderDetails.query.filter_by(product_id=product_id).filter_by(order_id=order_id).first_or_404()
+        product = Products.query.filter_by(id=product_id).first_or_404()
+        if product.quantity < quantity:
+            return {'error':'Error, not enough items in inventory'}, 500
+        if item.quantity > quantity:
+            put_items_back = item.quantity - quantity
+            product.quantity += put_items_back
+        else:
+            take_out_items = quantity - item.quantity
+            product.quantity -= take_out_items
+        item.quantity = quantity
+        try:
+            db.session.commit()
+            return {"message": "OK"}, 200
+        except Exception as e:
+            return {"error": e}, 500
 
 class CustomersSchema(ma.ModelSchema):
     class Meta:

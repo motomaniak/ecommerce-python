@@ -140,6 +140,12 @@ class Cart(Resource):
         result = Models.OrderDetails.delete(json_data['product_id'], json_data['order_id'])
         return result
 
+    def put(self):
+        json_data = request.get_json(force=True)
+        result = Models.OrderDetails.update(json_data['order_id'], json_data['product_id'], int(json_data['quantity']))
+        return result
+
+
 class Checkout(Resource):
     def put(self):
         json_data = request.get_json(force=True)
