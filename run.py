@@ -9,14 +9,7 @@ from flask_jwt_extended import JWTManager
 from config import config_settings
 
 app = Flask(__name__)
-<<<<<<< HEAD
-#app.config.from_object(config_settings['development'])
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql+psycopg2://aaron:rR65!QPWBN%K@localhost:5432/ecommerce'
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-=======
-app.config.from_object(config_settings['development'])
->>>>>>> master
+app.config.from_object(config_settings['production'])
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 jwt = JWTManager(app)
