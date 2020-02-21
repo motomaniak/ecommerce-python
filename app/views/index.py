@@ -4,7 +4,16 @@ from werkzeug.security import check_password_hash
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from app.models.Models import Customers, CustomersSchema, ProductsSchema, Products, OrderDetails
 from app.models import Models
+from run import jwt
 
+@jwt.expired_token_loader
+def my_expired_token_callback(expired_token):
+    token_type = expired_token['type']
+    return jsonify({
+        'status': 401,
+        'sub_status': 42,
+        'msg': 'The {} token has expired'.format(token_type)
+    }), 401
 
 class Customer(Resource):
     @jwt_required

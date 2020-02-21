@@ -242,7 +242,7 @@ class OrderDetails(db.Model):
     def update(order_id, product_id, quantity):
         item = OrderDetails.query.filter_by(product_id=product_id).filter_by(order_id=order_id).first_or_404()
         product = Products.query.filter_by(id=product_id).first_or_404()
-        if product.quantity < quantity:
+        if product.quantity < quantity - item.quantity:
             return {'error':'Error, not enough items in inventory'}, 500
         if item.quantity > quantity:
             put_items_back = item.quantity - quantity
@@ -256,6 +256,39 @@ class OrderDetails(db.Model):
             return {"message": "OK"}, 200
         except Exception as e:
             return {"error": e}, 500
+
+class ProductImages(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey(Products.id))
+    image_location = db.Column(db.String())
+
+    def __init__(self, product_id, image_location):
+        self.product_id = product_id
+        self.image_location = image_location
+
+    def __repr__(self):
+        return '<ProductImage {}>'.format(self.image_location)
+
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+        return self
+
+    def get_by_prodcut_id(product_id):
+        return ProductImages.query.filter_by(product_id=product_id).all()
+
+    def update(self):
+        pass
+
+    def delete(id):
+        image = ProductImages.query.filter_by(id=id).first_or_404()
+        try:
+            db.session.delete(image)
+            db.session.commit()
+            return {"message":"OK"}, 200
+        except e: 
+            return {"error": e}, 500
+
 
 class CustomersSchema(ma.ModelSchema):
     class Meta:
