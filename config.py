@@ -5,6 +5,7 @@ class Config(object):
     JWT_SECRET_KEY='rW27%NkfVQMUq%hnj%9RCp&9s$pkpfqVNwbbuwn'
     SQLALCHEMY_TRACK_MODIFICATIONS=False
     SQLALCHEMY_DATABASE_URI='postgresql+psycopg2://aaron:rR65!QPWBN%K@localhost:5432/ecommerce'
+    PROPAGATE_EXCEPTIONS=True
 
 class DevelopmentConfig(Config):
     DEBUG=True

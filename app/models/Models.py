@@ -2,6 +2,27 @@ from run import db, ma
 from werkzeug.security import generate_password_hash
 from flask import jsonify
 
+class Categories(db.Model):
+    __tablename__ ='categories'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    # products = db.relationship('Products', backref='categories')
+
+    def __init__(self, name):
+        self.name = name
+    
+    def __repr__(self):
+        return '<Category {}>'.format(self.name)
+
+
+    def add(self):
+        db.session.add(self)
+        db.session.commit()
+        return self
+
+    def get_all():
+        return Categories.query.all()
 
 class Products(db.Model):
     __tablename__ = 'products'
@@ -13,7 +34,8 @@ class Products(db.Model):
     quantity = db.Column(db.Integer)
     price = db.Column(db.Float)
     category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
-    order_details = db.relationship('OrderDetails', backref='prodcuts', lazy=True)
+    category = db.relationship('Categories')
+    images = db.relationship('ProductImages')
 
     def __init__(self, name, description, image, quantity, price, category_id):
         self.name = name,
@@ -32,7 +54,8 @@ class Products(db.Model):
         return self
     
     def get_all():
-        return db.session.query(Products).all()
+        # return db.session.query(Products).all()
+        return Products.query.all()
 
     def get_by_id(id):
         return Products.query.filter_by(id=id).join(Categories).one()
@@ -47,28 +70,40 @@ class Products(db.Model):
 
         db.session.commit()
 
-
-class Categories(db.Model):
-    __tablename__ ='categories'
-
+class ProductImages(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
-    products = db.relationship('Products', backref='categories', lazy=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    image_location = db.Column(db.String())
+    product = db.relationship('Products', backref='productimages')
 
-    def __init__(self, name):
-        self.name = name
     
-    def __repr__(self):
-        return '<Category {}>'.format(self.name)
 
+    def __init__(self, product_id, image_location):
+        self.product_id = product_id
+        self.image_location = image_location
+
+    def __repr__(self):
+        return '<ProductImage {}>'.format(self.image_location)
 
     def add(self):
         db.session.add(self)
         db.session.commit()
         return self
 
-    def get_all():
-        return Categories.query.all()
+    def get_by_prodcut_id(product_id):
+        return ProductImages.query.filter_by(product_id=product_id).all()
+
+    def update(self):
+        pass
+
+    def delete(id):
+        image = ProductImages.query.filter_by(id=id).first_or_404()
+        try:
+            db.session.delete(image)
+            db.session.commit()
+            return {"message":"OK"}, 200
+        except e: 
+            return {"error": e}, 500
 
 
 class Customers(db.Model):
@@ -132,15 +167,15 @@ class Orders(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(255))
     order_date = db.Column(db.DateTime)
-    shippid_date = db.Column(db.DateTime)
+    shipped_date = db.Column(db.DateTime)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
-    customer = db.relationship('Customers', foreign_keys=customer_id)
+    # customer = db.relationship('Customers', foreign_keys=customer_id)
     order_details = db.relationship('OrderDetails', cascade='all,delete', backref='orders')
 
     def __init__(self, customer_id, order_date):
         self.status = "Pending"
         self.customer_id = customer_id
-        self.shippid_date = None 
+        self.shipped_date = None 
         self.order_date = order_date
 
     def add(self):
@@ -182,7 +217,7 @@ class OrderDetails(db.Model):
     list_price = db.Column(db.Float)
     discount = db.Column(db.Float, db.CheckConstraint('0<=discount AND discount <1'))
     product = db.relationship('Products', backref='orderdetails')
-    order = db.relationship('Orders', backref='orderdetails')
+    # order = db.relationship('Orders', backref='orderdetails')
 
     def __init__(self, product_id, order_id, quantity, list_price, discount):
         self.product_id = product_id
@@ -242,7 +277,7 @@ class OrderDetails(db.Model):
     def update(order_id, product_id, quantity):
         item = OrderDetails.query.filter_by(product_id=product_id).filter_by(order_id=order_id).first_or_404()
         product = Products.query.filter_by(id=product_id).first_or_404()
-        if product.quantity < quantity:
+        if product.quantity < quantity - item.quantity:
             return {'error':'Error, not enough items in inventory'}, 500
         if item.quantity > quantity:
             put_items_back = item.quantity - quantity
@@ -266,11 +301,17 @@ class CategoriesSchema(ma.ModelSchema):
         model = Categories
         fields = ['name'] 
 
+class ProductImagesSchema(ma.ModelSchema):
+    class Meta:
+        model = ProductImages
+        fields = ['image_location']
+
 class ProductsSchema(ma.ModelSchema):
     class Meta:
         model = Products
-        fields = ['id', 'name', 'description', 'quantity', 'image', 'category']
+        fields = ('id', 'name', 'description', 'quantity', 'image', 'category', 'images')
     category = ma.Nested(CategoriesSchema)
+    images = ma.Nested(ProductImagesSchema, many=True)
 
 class OrderDetailsSchema(ma.ModelSchema):
     class Meta:
