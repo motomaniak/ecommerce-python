@@ -136,6 +136,7 @@ class Orders(Resource):
         return result
 
 class Cart(Resource):
+    @jwt_required
     def get(self):
         customer_id = get_jwt_identity()
         cart_shema = Models.CartSchema()
