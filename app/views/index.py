@@ -160,3 +160,12 @@ class Checkout(Resource):
         json_data = request.get_json(force=True)
         result = Models.Orders.checkout(json_data['order_id'])
         return result 
+
+class Reviews(Resource):
+    def get(self, id):
+        reviews_schema = Models.ReviewsSchema(many=True)
+        reviews = Models.Reviews.get_reviews_by_product(id)
+        result = reviews_schema.dump(reviews)
+        return result
+
+        

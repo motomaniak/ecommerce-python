@@ -71,6 +71,8 @@ class Products(db.Model):
         db.session.commit()
 
 class ProductImages(db.Model):
+    __tablename__ = 'product_images'
+
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     image_location = db.Column(db.String())
@@ -104,7 +106,6 @@ class ProductImages(db.Model):
             return {"message":"OK"}, 200
         except e: 
             return {"error": e}, 500
-
 
 class Customers(db.Model):
     __tablename__ = 'customers'
@@ -160,7 +161,6 @@ class Customers(db.Model):
         customer = Customers.query.filter_by(email=json_data['email']).first_or_404()
         return customer
 
-
 class Orders(db.Model):
     __tablename__ = 'orders'
 
@@ -208,7 +208,6 @@ class Orders(db.Model):
 
     def __repr__(self):
         return '<Order {}>'.format(self.id)
-
 
 class OrderDetails(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey(Products.id), primary_key=True)
@@ -291,6 +290,39 @@ class OrderDetails(db.Model):
             return {"message": "OK"}, 200
         except Exception as e:
             return {"error": e}, 500
+
+class Reviews(db.Model):
+    __tablename__ = 'reviews'
+
+    product_id = db.Column(db.Integer, db.ForeignKey(Products.id), primary_key=True)
+    customer_id = db.Column(db.Integer,  db.ForeignKey(Customers.id), primary_key=True)
+    rating = db.Column(db.Integer, db.CheckConstraint('1<=rating<=5'))
+    review = db.Column(db.String)
+
+    def __init__(self, product_id, customer_id, rating, review):
+        self.product_id = product_id
+        self.customer_id = customer_id
+        self.rating = rating
+        self.review = review
+
+    def __repr__(self):
+        return '<Review {}>'.format(self.review)
+
+    def add(self):
+        try:
+            db.session.add(self)
+            db.session.commit()
+            return {"message":"OK"}, 200
+        except e:
+            return {"error": e}, 500
+    
+    def get_reviews_by_product(product_id):
+        return Reviews.query.filter_by(product_id=product_id).all()
+
+class ReviewsSchema(ma.ModelSchema):
+    class Meta:
+        model = Reviews
+        fields = ['rating', 'review', 'customer_id']
 
 class CustomersSchema(ma.ModelSchema):
     class Meta:
