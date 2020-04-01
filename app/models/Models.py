@@ -319,8 +319,7 @@ class Reviews(db.Model):
     
     def get_reviews_by_product(product_id):
         # avg = db.session.query(func.avg(Reviews.rating).label('avg_rating')).filter_by(product_id=product_id).all()
-        results = Reviews.query.filter_by(product_id=product_id).all()
-        return results #[avg, results]
+        return Reviews.query.filter_by(product_id=product_id).all()
 
     def get_avg_rating(product_id):
         return db.session.query(func.avg(Reviews.rating).label('avg_rating')).filter_by(product_id=product_id).all()
