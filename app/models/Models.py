@@ -297,7 +297,7 @@ class Reviews(db.Model):
 
     product_id = db.Column(db.Integer, db.ForeignKey(Products.id), primary_key=True)
     customer_id = db.Column(db.Integer,  db.ForeignKey(Customers.id), primary_key=True)
-    rating = db.Column(db.Integer, db.CheckConstraint('1<=rating<=5'))
+    rating = db.Column(db.Integer, db.CheckConstraint('rating <= 5 and rating >= 1'))
     review = db.Column(db.String)
 
     def __init__(self, product_id, customer_id, rating, review):
