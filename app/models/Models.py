@@ -1,6 +1,7 @@
 from run import db, ma
 from werkzeug.security import generate_password_hash
 from flask import jsonify
+from sqlalchemy import func
 
 class Categories(db.Model):
     __tablename__ ='categories'
@@ -317,7 +318,12 @@ class Reviews(db.Model):
             return {"error": e}, 500
     
     def get_reviews_by_product(product_id):
-        return Reviews.query.filter_by(product_id=product_id).all()
+        # avg = db.session.query(func.avg(Reviews.rating).label('avg_rating')).filter_by(product_id=product_id).all()
+        results = Reviews.query.filter_by(product_id=product_id).all()
+        return results #[avg, results]
+
+    def get_avg_rating(product_id):
+        return db.session.query(func.avg(Reviews.rating).label('avg_rating')).filter_by(product_id=product_id).all()
 
 class ReviewsSchema(ma.ModelSchema):
     class Meta:
@@ -341,7 +347,7 @@ class ProductImagesSchema(ma.ModelSchema):
 class ProductsSchema(ma.ModelSchema):
     class Meta:
         model = Products
-        fields = ('id', 'name', 'description', 'quantity', 'image', 'category', 'images')
+        fields = ('id', 'name', 'description', 'quantity', 'image', 'category', 'price', 'images')
     category = ma.Nested(CategoriesSchema)
     images = ma.Nested(ProductImagesSchema, many=True)
 
