@@ -106,6 +106,7 @@ class Products(Resource):
     def get(self):
         product_schema = ProductsSchema(many=True)
         products = Models.Products.get_all()
+        # print(products[0][0])
         result = product_schema.dump(products)
         return result
 

@@ -2,6 +2,8 @@ from run import db, ma
 from werkzeug.security import generate_password_hash
 from flask import jsonify
 from sqlalchemy import func
+from flask_marshmallow import fields
+import simplejson
 
 class Categories(db.Model):
     __tablename__ ='categories'
@@ -56,8 +58,11 @@ class Products(db.Model):
     
     def get_all():
         # return db.session.query(Products).all()
-        return Products.query.all()
-
+        # result = Products.query.all()
+        q = db.session.query(Products.id, Products.name, Products.description, Products.image, Products.quantity, Products.category_id, func.avg(Reviews.rating).label('avg_rating')).outerjoin(Reviews, Products.id == Reviews.product_id).group_by(Products.id, Products.name, Products.price, Products.quantity, Products.category_id, Products.description, Products.image).all()
+        # print(q)
+        return q
+    
     def get_by_id(id):
         return Products.query.filter_by(id=id).join(Categories).one()
 
@@ -344,9 +349,11 @@ class ProductImagesSchema(ma.ModelSchema):
         fields = ['image_location']
 
 class ProductsSchema(ma.ModelSchema):
+    # avg_rating = ma.Float()
     class Meta:
+        # json_module = simplejson
         model = Products
-        fields = ('id', 'name', 'description', 'quantity', 'image', 'category', 'price', 'images')
+        fields = ('id', 'name', 'description', 'quantity', 'image', 'category', 'price', 'images', 'avg_rating')
     category = ma.Nested(CategoriesSchema)
     images = ma.Nested(ProductImagesSchema, many=True)
 
