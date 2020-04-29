@@ -58,10 +58,10 @@ class Products(db.Model):
     
     def get_all():
         # return db.session.query(Products).all()
-        # result = Products.query.all()
-        q = db.session.query(Products.id, Products.name, Products.description, Products.image, Products.quantity, Products.category_id, func.avg(Reviews.rating).label('avg_rating')).outerjoin(Reviews, Products.id == Reviews.product_id).group_by(Products.id, Products.name, Products.price, Products.quantity, Products.category_id, Products.description, Products.image).all()
+        result = Products.query.all()
+        # q = db.session.query(Products.id, Products.name, Products.description, Products.image, Products.quantity, Products.category_id, func.avg(Reviews.rating).label('avg_rating')).outerjoin(Reviews, Products.id == Reviews.product_id).group_by(Products.id, Products.name, Products.price, Products.quantity, Products.category_id, Products.description, Products.image).all()
         # print(q)
-        return q
+        return result
     
     def get_by_id(id):
         return Products.query.filter_by(id=id).join(Categories).one()
